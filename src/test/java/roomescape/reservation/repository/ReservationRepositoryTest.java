@@ -9,6 +9,7 @@ import roomescape.reservation.domain.ReservationTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CopyOnWriteArraySet;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -21,21 +22,33 @@ class ReservationRepositoryTest {
 
     @Test
     void findAll() {
-        reservationRepository = new ReservationRepository(ReservationRepository.WithDefaultValues());
+        Set<Reservation> defaultValues = ReservationRepository.WithDefaultValues();
+
+        reservationRepository = new ReservationRepository(defaultValues);
         List<Reservation> reservations = reservationRepository.findAll();
 
-        assertThat(reservations.size()).isEqualTo(3);
+        assertThat(reservations).size().isEqualTo(defaultValues.size());
     }
 
+    @DisplayName("findById: 조회에 성공한다.")
     @Test
     void findById() {
         reservationRepository = new ReservationRepository(ReservationRepository.WithDefaultValues());
         Reservation reservation = reservationRepository.findById(1L);
+
         assertThat(reservation).isNotNull();
         assertThat(reservation.getId()).isEqualTo(1L);
     }
 
-    @DisplayName("save: Id 값을 넣지 않아도 저장에 성공한다.")
+    @DisplayName("findById: 조회시 없는 id값을 찾았을때 예외를 터트린다.")
+    @Test
+    void findByIdException() {
+        reservationRepository = new ReservationRepository(ReservationRepository.WithDefaultValues());
+        assertThatThrownBy(() -> reservationRepository.findById(0L))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @DisplayName("save: 저장 하면서 자동으로 id값을 설정한다.")
     @Test
     void save() {
         reservationRepository = new ReservationRepository(new CopyOnWriteArraySet<>());
@@ -59,16 +72,17 @@ class ReservationRepositoryTest {
     @DisplayName("deleteById: 삭제에 성공한다.")
     @Test
     void deleteById() {
-        reservationRepository = new ReservationRepository(ReservationRepository.WithDefaultValues());
+        Set<Reservation> defaultValues = ReservationRepository.WithDefaultValues();
+        reservationRepository = new ReservationRepository(defaultValues);
 
         reservationRepository.deleteById(1L);
 
         assertThat(reservationRepository.findAll())
                 .size()
-                .isEqualTo(2);
+                .isEqualTo(defaultValues.size());
     }
 
-    @DisplayName("deleteById: 없는 아이디가 들어오면 예외를 발생시킨다.")
+    @DisplayName("deleteById: 삭제시 없는 아이디가 들어오면 예외를 발생시킨다.")
     @Test
     void deleteByIdException() {
         reservationRepository = new ReservationRepository(ReservationRepository.WithDefaultValues());
