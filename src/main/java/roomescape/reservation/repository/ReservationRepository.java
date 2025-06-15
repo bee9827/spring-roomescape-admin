@@ -14,7 +14,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class ReservationRepository implements Repository<Reservation> {
-    private final AtomicLong id = new AtomicLong(1L);
+    private final AtomicLong atomicLong = new AtomicLong();
     private final Set<Reservation> reservations;
 
     public ReservationRepository() {
@@ -41,6 +41,7 @@ public class ReservationRepository implements Repository<Reservation> {
 
     @Override
     public Reservation save(Reservation reservation) {
+        reservation.setId(atomicLong.incrementAndGet());
         reservations.add(reservation);
         return reservation;
     }
@@ -53,9 +54,8 @@ public class ReservationRepository implements Repository<Reservation> {
 
     public static Set<Reservation> WithDefaultValues() {
         Set<Reservation> reservations = new CopyOnWriteArraySet<>();
-        reservations.add(new Reservation(1L, "이름1", LocalDate.of(2025, 6, 1), new ReservationTime(LocalTime.of(1, 0))));
-        reservations.add(new Reservation(2L, "이름2", LocalDate.of(2025, 6, 2), new ReservationTime(LocalTime.of(2, 0))));
-        reservations.add(new Reservation(3L, "이름3", LocalDate.of(2025, 6, 3), new ReservationTime(LocalTime.of(3, 0))));
+        reservations.add(new Reservation(1L, "브라운", LocalDate.of(2023, 1, 1), new ReservationTime(LocalTime.of(10, 0))));
+        reservations.add(new Reservation(2L, "브라운", LocalDate.of(2023, 6, 2), new ReservationTime(LocalTime.of(11, 0))));
 
         return reservations;
     }

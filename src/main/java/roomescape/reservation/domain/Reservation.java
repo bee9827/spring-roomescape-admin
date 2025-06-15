@@ -21,7 +21,7 @@ public class Reservation {
         this.reservationTime = reservationTime;
     }
 
-    protected void SetId(Long id) {
+    public void setId(Long id) {
         this.id = id;
     }
 

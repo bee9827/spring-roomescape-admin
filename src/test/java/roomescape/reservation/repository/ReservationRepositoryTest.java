@@ -35,12 +35,12 @@ class ReservationRepositoryTest {
         assertThat(reservation.getId()).isEqualTo(1L);
     }
 
+    @DisplayName("save: Id 값을 넣지 않아도 저장에 성공한다.")
     @Test
     void save() {
         reservationRepository = new ReservationRepository(new CopyOnWriteArraySet<>());
 
         Reservation reservation = new Reservation.Builder()
-                .id(1L)
                 .name("이름1")
                 .date(LocalDate.of(2020, 1, 1))
                 .reservationTime(new ReservationTime(LocalTime.of(1, 0)))
@@ -51,6 +51,9 @@ class ReservationRepositoryTest {
         assertThat(savedReservation)
                 .isNotNull()
                 .isEqualTo(reservation);
+
+        //
+        assertThat(savedReservation.getId()).isEqualTo(1);
     }
 
     @DisplayName("deleteById: 삭제에 성공한다.")
@@ -72,8 +75,5 @@ class ReservationRepositoryTest {
 
         assertThatThrownBy(() -> reservationRepository.deleteById(0L))
                 .isInstanceOf(IllegalArgumentException.class);
-
-
-
     }
 }
