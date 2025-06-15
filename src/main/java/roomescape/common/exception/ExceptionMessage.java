@@ -1,4 +1,4 @@
-package roomescape.common;
+package roomescape.common.exception;
 
 public enum ExceptionMessage {
     RESERVATION_NOT_FOUND("Reservation not found"),

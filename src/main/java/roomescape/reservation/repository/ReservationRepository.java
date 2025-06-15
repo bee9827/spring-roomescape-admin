@@ -1,7 +1,7 @@
 package roomescape.reservation.repository;
 
 import org.springframework.stereotype.Component;
-import roomescape.common.ExceptionMessage;
+import roomescape.common.exception.ExceptionMessage;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 

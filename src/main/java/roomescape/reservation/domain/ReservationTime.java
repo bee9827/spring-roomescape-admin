@@ -6,7 +6,7 @@ package roomescape.reservation.domain;
 import java.time.LocalTime;
 
 public class ReservationTime {
-    private LocalTime startTime;
+    private final LocalTime startTime;
 
     public ReservationTime(LocalTime startTime) {
         this.startTime = startTime;
