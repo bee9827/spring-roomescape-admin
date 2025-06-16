@@ -32,16 +32,24 @@ public class ReservationApiController {
 
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponseDto> getReservation(@PathVariable Long id) {
-        ReservationResponseDto reservation = new ReservationResponseDto(reservationRepository.findById(id));
+        try {
+            ReservationResponseDto reservation = new ReservationResponseDto(reservationRepository.findById(id));
 
-        return ResponseEntity.ok(reservation);
+            return ResponseEntity.ok(reservation);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationRepository.deleteById(id);
+        try {
+            reservationRepository.deleteById(id);
 
-        return ResponseEntity.ok().build();
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
