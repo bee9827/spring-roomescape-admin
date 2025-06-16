@@ -5,9 +5,9 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 
 @Component
-public interface Repository<T> {
+public interface CustomRepository<T> {
     Collection<T> findAll();
-    T findById(long id);
-    T save(T t);
+    T findById(Long id);
+    Long save(T t);
     void deleteById(Long id);
 }

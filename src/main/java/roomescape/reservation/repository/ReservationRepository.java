@@ -1,63 +1,89 @@
 package roomescape.reservation.repository;
 
-import org.springframework.stereotype.Component;
-import roomescape.common.exception.ExceptionMessage;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicLong;
+import javax.sql.DataSource;
+import java.sql.Date;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-@Component
-public class ReservationRepository implements Repository<Reservation> {
-    private final AtomicLong atomicLong = new AtomicLong();
-    private final Set<Reservation> reservations;
+@Repository
+public class ReservationRepository implements CustomRepository<Reservation> {
 
-    public ReservationRepository() {
-        this.reservations = new CopyOnWriteArraySet<>();
-    }
 
-    public ReservationRepository(Set<Reservation> reservations) {
-        this.reservations = reservations;
-    }
+    private static final RowMapper<Reservation> ROW_MAPPER = (resultSet, rowNum) -> new Reservation(
+            resultSet.getLong("id"),
+            resultSet.getString("name"),
+            resultSet.getDate("date").toLocalDate(),
+            new ReservationTime(
+                    resultSet.getLong("time_id"),
+                    resultSet.getTime("start_at").toLocalTime()
+            )
+    );
 
-    public static Set<Reservation> WithDefaultValues() {
-        Set<Reservation> reservations = new CopyOnWriteArraySet<>();
-        reservations.add(new Reservation(1L, "브라운", LocalDate.of(2023, 1, 1), new ReservationTime(LocalTime.of(10, 0))));
-        reservations.add(new Reservation(2L, "브라운", LocalDate.of(2023, 6, 2), new ReservationTime(LocalTime.of(11, 0))));
+    private final JdbcTemplate jdbcTemplate;
+    private final SimpleJdbcInsert jdbcInsert;
 
-        return reservations;
-    }
-
-    @Override
-    public List<Reservation> findAll() {
-        return new ArrayList<>(reservations);
+    public ReservationRepository(final JdbcTemplate jdbcTemplate, final DataSource dataSource) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.jdbcInsert = new SimpleJdbcInsert(dataSource)
+                .withTableName("reservation")
+                .usingGeneratedKeyColumns("id");
     }
 
     @Override
-    public Reservation findById(long id) throws IllegalArgumentException {
-        return reservations.stream()
-                .filter(r -> r.getId() == id)
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(ExceptionMessage.RESERVATION_NOT_FOUND.getMessage() + id));
+    public Long save(final Reservation reservation) {
+        Map<String, Object> parameters = new HashMap<>();
+        parameters.put("name", reservation.getName());
+        parameters.put("date", Date.valueOf(reservation.getDate()));
+        parameters.put("time_id", reservation.getTime().getId());
 
+        return jdbcInsert.executeAndReturnKey(parameters).longValue();
     }
 
     @Override
-    public Reservation save(Reservation reservation) {
-        reservation.setId(atomicLong.incrementAndGet());
-        reservations.add(reservation);
-        return reservation;
+    public Reservation findById(final Long id) {
+        String sql = """               
+                SELECT
+                    r.id as reservation_id,
+                    r.name,
+                    r.date,
+                    t.id as time_id,
+                    t.start_at as time_value
+                FROM reservation as r
+                INNER JOIN reservation_time as t
+                ON r.time_id = t.id
+                WHERE r.id = ?
+                """;
+        return jdbcTemplate.queryForObject(sql, ROW_MAPPER, id);
     }
 
     @Override
-    public void deleteById(Long id) {
-        Reservation savedReservation = findById(id);
-        reservations.remove(savedReservation);
+    public void deleteById(final Long id) {
+        String sql = "DELETE FROM reservation WHERE id = ?";
+        jdbcTemplate.update(sql, id);
+    }
+
+    @Override
+    public Collection<Reservation> findAll() {
+        String sql = """               
+                SELECT
+                    r.id as reservation_id,
+                    r.name,
+                    r.date,
+                    t.id as time_id,
+                    t.start_at as time_value
+                FROM reservation as r
+                INNER JOIN reservation_time as t
+                ON r.time_id = t.id
+                """;
+
+        return jdbcTemplate.query(sql, ROW_MAPPER);
     }
 }
