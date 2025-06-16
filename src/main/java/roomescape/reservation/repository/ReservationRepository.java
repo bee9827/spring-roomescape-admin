@@ -4,8 +4,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.common.CustomRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservationTime.domain.ReservationTime;
 
 import javax.sql.DataSource;
 import java.sql.Date;

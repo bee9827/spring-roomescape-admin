@@ -2,21 +2,32 @@ package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.ReservationRequestDto;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.reservationTime.repository.ReservationTimeRepository;
 
 import java.util.List;
 
 @Service
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    public ReservationService(ReservationRepository reservationRepository) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
         this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
     }
 
-    public Reservation save(Reservation reservation) {
-        //동일한 요청이 두번 들어 올 경우 어떻게 할지 생각해 봐야함.
-        Long savedId = reservationRepository.save(reservation);
+    public Reservation save(ReservationRequestDto reservationRequestDto) {
+        ReservationTime time = reservationTimeRepository.findByStartAt(reservationRequestDto.time());
+        if(time == null) {
+            throw new IllegalArgumentException("Time not found");
+        }
+
+        Reservation requestReservation = reservationRequestDto.toEntity(time);
+
+        Long savedId = reservationRepository.save(requestReservation);
         return reservationRepository.findById(savedId);
     }
 

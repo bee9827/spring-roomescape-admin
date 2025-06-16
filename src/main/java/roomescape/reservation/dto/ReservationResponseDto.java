@@ -12,6 +12,7 @@ public record ReservationResponseDto(
         String name,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time) {
+
     public ReservationResponseDto(Reservation reservation) {
         this(
                 reservation.getId(),

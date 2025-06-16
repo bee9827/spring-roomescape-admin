@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.*;
+import roomescape.reservationTime.domain.ReservationTime;
 
 import java.time.LocalDate;
 

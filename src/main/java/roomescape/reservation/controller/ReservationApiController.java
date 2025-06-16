@@ -57,8 +57,7 @@ public class ReservationApiController {
             @RequestBody
             @Valid
             ReservationRequestDto reservationRequestDto) {
-        Reservation entity = reservationRequestDto.toEntity();
-        Reservation reservation = reservationService.save(entity);
+        Reservation reservation = reservationService.save(reservationRequestDto);
 
         return ResponseEntity.ok(new ReservationResponseDto(reservation));
     }
