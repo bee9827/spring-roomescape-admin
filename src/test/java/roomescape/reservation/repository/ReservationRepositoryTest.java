@@ -20,6 +20,7 @@ class ReservationRepositoryTest {
 
     private ReservationRepository reservationRepository;
 
+    @DisplayName("findAll: 전체 조회에 성공한다.")
     @Test
     void findAll() {
         Set<Reservation> defaultValues = ReservationRepository.WithDefaultValues();
