@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequestDto;
 import roomescape.reservation.dto.ReservationResponseDto;
-import roomescape.reservation.repository.Repository;
+import roomescape.reservation.service.ReservationService;
 
 import java.util.List;
 
@@ -14,15 +14,15 @@ import java.util.List;
 @RequestMapping("/reservations")
 public class ReservationApiController {
 
-    private final Repository<Reservation> reservationRepository;
+    private final ReservationService reservationService;
 
-    public ReservationApiController(Repository<Reservation> reservationRepository) {
-        this.reservationRepository = reservationRepository;
+    public ReservationApiController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationResponseDto>> getReservations() {
-        List<ReservationResponseDto> reservations = reservationRepository.findAll()
+        List<ReservationResponseDto> reservations = reservationService.findAll()
                 .stream()
                 .map(ReservationResponseDto::new)
                 .toList();
@@ -33,7 +33,7 @@ public class ReservationApiController {
     @GetMapping("/{id}")
     public ResponseEntity<ReservationResponseDto> getReservation(@PathVariable Long id) {
         try {
-            ReservationResponseDto reservation = new ReservationResponseDto(reservationRepository.findById(id));
+            ReservationResponseDto reservation = new ReservationResponseDto(reservationService.findById(id));
 
             return ResponseEntity.ok(reservation);
         } catch (IllegalArgumentException e) {
@@ -44,7 +44,7 @@ public class ReservationApiController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
         try {
-            reservationRepository.deleteById(id);
+            reservationService.deleteById(id);
 
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
@@ -58,7 +58,7 @@ public class ReservationApiController {
             @Valid
             ReservationRequestDto reservationRequestDto) {
         Reservation entity = reservationRequestDto.toEntity();
-        Reservation reservation = reservationRepository.save(entity);
+        Reservation reservation = reservationService.save(entity);
 
         return ResponseEntity.ok(new ReservationResponseDto(reservation));
     }
