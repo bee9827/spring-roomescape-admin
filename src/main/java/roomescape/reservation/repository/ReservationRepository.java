@@ -19,7 +19,7 @@ public class ReservationRepository implements Repository<Reservation> {
     private final Set<Reservation> reservations;
 
     public ReservationRepository() {
-        this.reservations = WithDefaultValues();
+        this.reservations = new CopyOnWriteArraySet<>();
     }
 
     public ReservationRepository(Set<Reservation> reservations) {
@@ -40,7 +40,7 @@ public class ReservationRepository implements Repository<Reservation> {
     }
 
     @Override
-    public Reservation findById(long id) {
+    public Reservation findById(long id) throws IllegalArgumentException {
         return reservations.stream()
                 .filter(r -> r.getId() == id)
                 .findFirst()
