@@ -10,14 +10,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record ReservationRequestDto(
-        @NotBlank
+        @NotBlank(message = "이름은 공백일 수 없습니다.")
         String name,
 
-        @NotNull
+        @NotNull(message = "날짜는 공백일 수 없습니다.")
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
 
-        @NotNull
+        @NotNull(message = "시간은 공백일 수 없습니다.")
         @DateTimeFormat(pattern = "HH:mm")
         LocalTime time) {
     public Reservation toEntity(ReservationTime reservationTime) {

@@ -56,8 +56,15 @@ public class ReservationTimeRepository implements CustomRepository<ReservationTi
         return jdbcTemplate.query(sql, ROW_MAPPER);
     }
 
+    public Boolean existsByStartAt(LocalTime startAt) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_time WHERE start_at = ?)";
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, startAt);
+    }
+
     public ReservationTime findByStartAt(LocalTime startAt) {
         String sql = "SELECT * FROM reservation_time WHERE start_at = ?";
+
         return jdbcTemplate.queryForObject(sql, ROW_MAPPER, startAt);
     }
 }

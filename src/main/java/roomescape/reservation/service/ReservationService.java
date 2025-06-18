@@ -1,8 +1,8 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.common.exception.NotFoundException;
-import roomescape.common.exception.ExceptionMessage;
+import roomescape.common.exception.RestApiException;
+import roomescape.common.exception.status.ReservationErrorStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationRequestDto;
 import roomescape.reservation.repository.ReservationRepository;
@@ -22,11 +22,10 @@ public class ReservationService {
     }
 
     public Reservation save(ReservationRequestDto reservationRequestDto) {
-        ReservationTime time = reservationTimeRepository.findByStartAt(reservationRequestDto.time());
-        if (time == null) {
-            throw new NotFoundException(ExceptionMessage.RESERVATION_TIME_NOT_FOUND_BY_TIME.getMessage() + reservationRequestDto.time());
+        if (!reservationTimeRepository.existsByStartAt(reservationRequestDto.time())) {
+            throw new RestApiException(ReservationErrorStatus.TIME_NOT_FOUND);
         }
-
+        ReservationTime time = reservationTimeRepository.findByStartAt(reservationRequestDto.time());
         Reservation requestReservation = reservationRequestDto.toEntity(time);
 
         Long savedId = reservationRepository.save(requestReservation);
@@ -34,6 +33,8 @@ public class ReservationService {
     }
 
     public Reservation findById(Long id) {
+        if(!reservationRepository.existById(id))
+            throw new RestApiException(ReservationErrorStatus.NOT_FOUND);
         return reservationRepository.findById(id);
     }
 
@@ -45,7 +46,7 @@ public class ReservationService {
 
     public void deleteById(Long id) {
         if (reservationRepository.findById(id) == null) {
-            throw new NotFoundException(ExceptionMessage.RESERVATION_NOT_FOUND_BY_ID.getMessage() + id);
+            throw new RestApiException(ReservationErrorStatus.NOT_FOUND);
         }
 
         reservationRepository.deleteById(id);
