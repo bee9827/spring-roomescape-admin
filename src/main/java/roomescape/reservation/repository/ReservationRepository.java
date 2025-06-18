@@ -51,12 +51,7 @@ public class ReservationRepository implements CustomRepository<Reservation> {
     @Override
     public Reservation findById(final Long id) {
         String sql = """               
-                SELECT
-                    r.id as reservation_id,
-                    r.name,
-                    r.date,
-                    t.id as time_id,
-                    t.start_at as time_value
+                SELECT *
                 FROM reservation as r
                 INNER JOIN reservation_time as t
                 ON r.time_id = t.id

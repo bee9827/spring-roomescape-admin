@@ -31,32 +31,29 @@ public class ReservationApiController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservationResponseDto> getReservation(@PathVariable Long id) {
-        try {
-            ReservationResponseDto reservation = new ReservationResponseDto(reservationService.findById(id));
-
-            return ResponseEntity.ok(reservation);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ReservationResponseDto> getReservation(
+            @PathVariable
+            Long id
+    ) {
+        ReservationResponseDto reservation = new ReservationResponseDto(reservationService.findById(id));
+        return ResponseEntity.ok(reservation);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        try {
-            reservationService.deleteById(id);
-
-            return ResponseEntity.ok().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable
+            Long id
+    ) {
+        reservationService.deleteById(id);
+        return ResponseEntity.ok().build();
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponseDto> createReservation(
             @RequestBody
             @Valid
-            ReservationRequestDto reservationRequestDto) {
+            ReservationRequestDto reservationRequestDto
+    ) {
         Reservation reservation = reservationService.save(reservationRequestDto);
 
         return ResponseEntity.ok(new ReservationResponseDto(reservation));
