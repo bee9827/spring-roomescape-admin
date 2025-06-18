@@ -62,9 +62,9 @@ public class ReservationRepository implements CustomRepository<Reservation> {
     }
 
     @Override
-    public void deleteById(final Long id) {
+    public Boolean deleteById(final Long id) {
         String sql = "DELETE FROM reservation WHERE id = ?";
-        jdbcTemplate.update(sql, id);
+        return jdbcTemplate.update(sql, id) == 1;
     }
 
     @Override
@@ -84,7 +84,7 @@ public class ReservationRepository implements CustomRepository<Reservation> {
         return jdbcTemplate.query(sql, ROW_MAPPER);
     }
 
-    public boolean existById(final Long id) {
+    public boolean existsById(final Long id) {
         String sql = """
                 SELECT EXISTS(
                 SELECT 1

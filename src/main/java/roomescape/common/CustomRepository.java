@@ -9,5 +9,5 @@ public interface CustomRepository<T> {
     Collection<T> findAll();
     T findById(Long id);
     Long save(T t);
-    void deleteById(Long id);
+    Boolean deleteById(Long id);
 }

@@ -33,7 +33,7 @@ public class ReservationService {
     }
 
     public Reservation findById(Long id) {
-        if(!reservationRepository.existById(id))
+        if(!reservationRepository.existsById(id))
             throw new RestApiException(ReservationErrorStatus.NOT_FOUND);
         return reservationRepository.findById(id);
     }
@@ -44,11 +44,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteById(Long id) {
-        if (reservationRepository.findById(id) == null) {
+    public boolean deleteById(Long id) {
+        if (!reservationRepository.existsById(id)) {
             throw new RestApiException(ReservationErrorStatus.NOT_FOUND);
         }
 
-        reservationRepository.deleteById(id);
+        return reservationRepository.deleteById(id);
     }
 }
