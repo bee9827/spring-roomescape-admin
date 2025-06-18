@@ -1,9 +1,15 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.FutureOrPresent;
+import jakarta.validation.constraints.NotNull;
+import roomescape.common.exception.RestApiException;
+import roomescape.common.exception.status.ReservationErrorStatus;
 import roomescape.reservationTime.domain.ReservationTime;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Table(
@@ -22,15 +28,17 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY) //쓰레드 세이프 하지 않다.
     private Long id;
     private String name;
+
     private LocalDate date;
 
-    @OneToOne
+    @ManyToOne
     private ReservationTime time;
 
     protected Reservation() {
     }
 
     public Reservation(Long id, String name, LocalDate date, ReservationTime time) {
+        validDateTime(date,time.getStartAt());
         this.id = id;
         this.name = name;
         this.date = date;
@@ -55,6 +63,14 @@ public class Reservation {
 
     public ReservationTime getTime() {
         return time;
+    }
+
+    private void validDateTime(LocalDate date, LocalTime startAt) {
+        LocalDateTime now = LocalDateTime.now();
+
+        if(now.isAfter(LocalDateTime.of(date, startAt))){
+            throw new RestApiException(ReservationErrorStatus.PAST_TIME);
+        }
     }
 
     public static class Builder {
