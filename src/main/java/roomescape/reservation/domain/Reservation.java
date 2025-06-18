@@ -6,6 +6,17 @@ import roomescape.reservationTime.domain.ReservationTime;
 import java.time.LocalDate;
 
 @Entity
+@Table(
+        name = "RESERVATION",
+        uniqueConstraints = {
+                @UniqueConstraint(
+                        name = "RESERVATION_DATE",
+                        columnNames = {
+                                "date",
+                                "time_id"
+                })
+        }
+)
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) //쓰레드 세이프 하지 않다.
