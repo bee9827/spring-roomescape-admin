@@ -32,6 +32,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.stream.Stream;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -41,9 +42,14 @@ class ReservationApiControllerTest {
     public static final String BASE_URL = "/reservations";
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
-    ReservationTime time = new ReservationTime(1L, LocalTime.now());
-    ReservationRequestDto requestDto = new ReservationRequestDto("이름", LocalDate.now().plusDays(1), time.getStartAt());
-    Reservation reservation = requestDto.toEntity(time);
+    ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now());
+    ReservationRequestDto requestDto = new ReservationRequestDto("이름", LocalDate.of(2025,12,31), reservationTime.getStartAt());
+    Reservation reservation = new Reservation.Builder()
+            .id(1L)
+            .name("이름")
+            .date(LocalDate.of(2025,12,31))
+            .reservationTime(reservationTime)
+            .build();
     ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation);
 
 
@@ -59,7 +65,13 @@ class ReservationApiControllerTest {
     }
 
     @Test
-    void deleteReservation() {
+    @DisplayName("204: 예약 삭제 성공")
+    void deleteReservation() throws Exception {
+        doNothing().when(reservationService).deleteById(any());
+
+        mockMvc.perform(MockMvcRequestBuilders.delete(BASE_URL + "/1"))
+                .andDo(MockMvcResultHandlers.print())
+                .andExpect(status().isNoContent());
     }
 
     @Nested
@@ -112,16 +124,13 @@ class ReservationApiControllerTest {
 
             mockMvc.perform(
                             MockMvcRequestBuilders.post(BASE_URL)
-                                    .content("""
-                                            {
-                                                "name" : "테스트",
-                                                "date" : "2025-06-21",
-                                                "time" : "12:00"
-                                            }
-                                            """)
+                                    .content(objectMapper.writeValueAsString(requestDto))
                                     .contentType(MediaType.APPLICATION_JSON))
                     .andDo(MockMvcResultHandlers.print())
-                    .andExpect(status().isCreated());
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id").value(reservationResponseDto.id()))
+                    .andExpect(jsonPath("$.date").value(reservationResponseDto.date().format(DateTimeFormatter.ofPattern(ReservationResponseDto.DATE_PATTERN))))
+                    .andExpect(jsonPath("$.time").value(reservationResponseDto.time().format(DateTimeFormatter.ofPattern(ReservationResponseDto.TIME_PATTERN))));
 
 
         }
@@ -157,7 +166,7 @@ class ReservationApiControllerTest {
                                                 "date" : "%s",
                                                 "time" : "%s"
                                             }
-                                            """.formatted(reservation.getName(), date, time.getStartAt().toString()))
+                                            """.formatted(reservation.getName(), date, reservationTime.getStartAt().toString()))
                                     .contentType(MediaType.APPLICATION_JSON))
                     .andDo(MockMvcResultHandlers.print())
                     .andExpect(status().isBadRequest());

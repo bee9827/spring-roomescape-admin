@@ -47,7 +47,7 @@ public class ReservationApiController {
             Long id
     ) {
         reservationService.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping

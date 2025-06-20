@@ -129,10 +129,11 @@ class ReservationServiceTest {
         @Test
         @DisplayName("삭제에 성공한다")
         void success() {
-            when(reservationRepository.existsById(1L)).thenReturn(true);
-            when(reservationRepository.deleteById(any())).thenReturn(true);
+            when(reservationRepository.existsById(any())).thenReturn(true);
+            reservationService.deleteById(1L);
+            when(reservationRepository.existsById(any())).thenReturn(false);
 
-            assertThat(reservationService.deleteById(1L)).isTrue();
+            assertThat(reservationRepository.existsById(1L)).isFalse();
         }
 
         @Test

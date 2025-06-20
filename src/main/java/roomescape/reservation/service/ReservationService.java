@@ -45,11 +45,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public boolean deleteById(Long id) {
+    public void deleteById(Long id) {
         if (!reservationRepository.existsById(id)) {
             throw new RestApiException(ReservationErrorStatus.NOT_FOUND);
         }
 
-        return reservationRepository.deleteById(id);
+        reservationRepository.deleteById(id);
     }
 }
