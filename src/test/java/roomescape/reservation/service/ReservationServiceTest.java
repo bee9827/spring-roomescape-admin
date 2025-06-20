@@ -1,13 +1,12 @@
 package roomescape.reservation.service;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.cglib.core.Local;
 import roomescape.common.exception.RestApiException;
 import roomescape.common.exception.status.ReservationErrorStatus;
 import roomescape.reservation.domain.Reservation;
@@ -31,51 +30,12 @@ class ReservationServiceTest {
     @Mock
     ReservationTimeRepository reservationTimeRepository;
 
-    ReservationService reservationService = new ReservationService(reservationRepository, reservationTimeRepository);
+    @InjectMocks
+    ReservationService reservationService;
 
     ReservationTime reservationTime = getReservationTime();
     ReservationRequestDto reservationRequestDto = getReservationReqeustDto();
     Reservation reservation = createReservation(reservationTime);
-
-    @Nested
-    @DisplayName("save")
-    class Save {
-
-        @DisplayName("save: 저장에 성공한다.")
-        @Test
-        void save() {
-            when(reservationTimeRepository.existsByStartAt(reservationRequestDto.time())).thenReturn(true);
-            when(reservationTimeRepository.findByStartAt(any(LocalTime.class))).thenReturn(reservationTime);
-            when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation.getId());
-            when(reservationRepository.findById(any(Long.class))).thenReturn(reservation);
-
-            reservationService = new ReservationService(reservationRepository, reservationTimeRepository);
-            Reservation savedReservation = reservationService.save(reservationRequestDto);
-
-            assertThat(savedReservation).isEqualTo(reservation);
-        }
-
-        @Test
-        @DisplayName("예외: 저장된 Time이 없다면 예외를 던진다.")
-        void reservationTimeNotFound() {
-            when(
-                    reservationTimeRepository.existsByStartAt(
-                            any(LocalTime.class))
-            ).thenReturn(false);
-
-            reservationService = new ReservationService(reservationRepository, reservationTimeRepository);
-            assertThatThrownBy(() -> reservationService.save(reservationRequestDto))
-                    .isInstanceOf(RestApiException.class).hasMessage(ReservationErrorStatus.TIME_NOT_FOUND.getMessage());
-        }
-
-//        @Test
-//        @DisplayName("예외: 날짜와 시간이 중복 됐다면 예외를 던진다.") -> 저장소의 역할
-//        void reservationDuplicateException() {
-//            when(reservationTimeRepository.existsByStartAt(reservationRequestDto.time())).thenReturn(true);
-//
-//
-//        }
-    }
 
     private Reservation createReservation(ReservationTime reservationTime) {
         return new Reservation.Builder()
@@ -89,7 +49,7 @@ class ReservationServiceTest {
     private ReservationTime getReservationTime() {
         return new ReservationTime(
                 1L,
-                LocalTime.of(10,0)
+                LocalTime.of(10, 0)
         );
     }
 
@@ -102,6 +62,44 @@ class ReservationServiceTest {
     }
 
     @Nested
+    @DisplayName("save")
+    class Save {
+
+        @DisplayName("save: 저장에 성공한다.")
+        @Test
+        void save() {
+            when(reservationTimeRepository.existsByStartAt(reservationRequestDto.time())).thenReturn(true);
+            when(reservationTimeRepository.findByStartAt(any(LocalTime.class))).thenReturn(reservationTime);
+            when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation.getId());
+            when(reservationRepository.findById(any(Long.class))).thenReturn(reservation);
+
+            Reservation savedReservation = reservationService.save(reservationRequestDto);
+
+            assertThat(savedReservation).isEqualTo(reservation);
+        }
+
+        @Test
+        @DisplayName("예외: 저장된 Time이 없다면 예외를 던진다.")
+        void reservationTimeNotFound() {
+            when(
+                    reservationTimeRepository.existsByStartAt(
+                            any(LocalTime.class))
+            ).thenReturn(false);
+
+            assertThatThrownBy(() -> reservationService.save(reservationRequestDto))
+                    .isInstanceOf(RestApiException.class).hasMessage(ReservationErrorStatus.TIME_NOT_FOUND.getMessage());
+        }
+
+//        @Test
+//        @DisplayName("예외: 날짜와 시간이 중복 됐다면 예외를 던진다.") -> 저장소의 역할
+//        void reservationDuplicateException() {
+//            when(reservationTimeRepository.existsByStartAt(reservationRequestDto.time())).thenReturn(true);
+//
+//
+//        }
+    }
+
+    @Nested
     @DisplayName("findById")
     class FindById {
         @Test
@@ -109,7 +107,6 @@ class ReservationServiceTest {
         void findById() {
             when(reservationRepository.existsById(1L)).thenReturn(true);
             when(reservationRepository.findById(any())).thenReturn(reservation);
-            reservationService = new ReservationService(reservationRepository, reservationTimeRepository);
 
             Reservation request = reservationService.findById(1L);
             assertThat(request).isEqualTo(reservation);
@@ -119,7 +116,6 @@ class ReservationServiceTest {
         @DisplayName("예외: 없는 아이디 라면 예외를 던진다.")
         void findByIdNotFound() {
             when(reservationRepository.existsById(any())).thenReturn(false);
-            reservationService = new ReservationService(reservationRepository, reservationTimeRepository);
 
             assertThatThrownBy(() -> reservationService.findById(1L))
                     .isInstanceOf(RestApiException.class)
@@ -132,19 +128,17 @@ class ReservationServiceTest {
     class deleteById {
         @Test
         @DisplayName("삭제에 성공한다")
-        void success(){
+        void success() {
             when(reservationRepository.existsById(1L)).thenReturn(true);
             when(reservationRepository.deleteById(any())).thenReturn(true);
-            reservationService = new ReservationService(reservationRepository, reservationTimeRepository);
 
             assertThat(reservationService.deleteById(1L)).isTrue();
         }
 
         @Test
-        @DisplayName("예외: 없는 아이디라면 예외를 던진다.")
+        @DisplayName("예외: 없는 아이디 라면 예외를 던진다.")
         void notFoundException() {
             when(reservationRepository.existsById(any())).thenReturn(false);
-            reservationService = new ReservationService(reservationRepository, reservationTimeRepository);
 
             assertThatThrownBy(() -> reservationService.deleteById(0L))
                     .isInstanceOf(RestApiException.class)

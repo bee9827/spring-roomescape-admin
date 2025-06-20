@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 
 public record ReservationRequestDto(
+        @NotNull
         @NotBlank(message = "이름은 공백일 수 없습니다.")
         String name,
 

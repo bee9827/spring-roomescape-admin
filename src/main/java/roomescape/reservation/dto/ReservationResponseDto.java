@@ -10,8 +10,11 @@ import java.time.LocalTime;
 public record ReservationResponseDto(
         Long id,
         String name,
-        @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-        @JsonFormat(pattern = "HH:mm") LocalTime time) {
+        @JsonFormat(pattern = DATE_PATTERN) LocalDate date,
+        @JsonFormat(pattern = TIME_PATTERN) LocalTime time) {
+    public static final String DATE_PATTERN = "yyyy-MM-dd";
+    public static final String TIME_PATTERN = "HH:mm";
+
 
     public ReservationResponseDto(Reservation reservation) {
         this(

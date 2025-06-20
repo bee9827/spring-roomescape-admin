@@ -8,11 +8,13 @@ import roomescape.reservation.dto.ReservationRequestDto;
 import roomescape.reservation.dto.ReservationResponseDto;
 import roomescape.reservation.service.ReservationService;
 
+import java.net.URI;
 import java.util.List;
 
 @RestController
-@RequestMapping("/reservations")
+@RequestMapping(ReservationApiController.BASE_URL)
 public class ReservationApiController {
+    public static final String BASE_URL = "/reservations";
 
     private final ReservationService reservationService;
 
@@ -54,8 +56,10 @@ public class ReservationApiController {
             @Valid
             ReservationRequestDto reservationRequestDto
     ) {
-        Reservation reservation = reservationService.save(reservationRequestDto);
+        ReservationResponseDto reservationResponse = new ReservationResponseDto(reservationService.save(reservationRequestDto));
+        URI uri = URI.create(BASE_URL + "/" + reservationResponse.id());
 
-        return ResponseEntity.ok(new ReservationResponseDto(reservation));
+
+        return ResponseEntity.created(uri).body(reservationResponse);
     }
 }

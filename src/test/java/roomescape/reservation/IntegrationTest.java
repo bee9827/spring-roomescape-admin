@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.reservation;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.DisplayName;
