@@ -5,7 +5,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RestApiException;
 import roomescape.common.exception.status.ReservationErrorStatus;
@@ -16,18 +16,15 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-@SpringBootTest
+@DataJpaTest
+@Transactional
 class ReservationTest {
-    private final EntityManager em;
 
     @Autowired
-    public ReservationTest(EntityManager em) {
-        this.em = em;
-    }
+    private EntityManager em;
 
     @Test
     @DisplayName("DUPLICATE_EXCEPTION: 중복된 날짜와 시간이 저장 되면 예외를 던진다.")
-    @Transactional
     public void duplicateDateException() {
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
 
