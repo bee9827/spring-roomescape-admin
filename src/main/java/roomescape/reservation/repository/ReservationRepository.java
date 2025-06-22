@@ -95,16 +95,14 @@ public class ReservationRepository implements CustomRepository<Reservation> {
         return jdbcTemplate.queryForObject(sql, Boolean.class, id);
     }
 
-    public Reservation findByDateAndTimeId(final LocalDate date, final Long timeId) {
+    public boolean existsByDateAndTimeId(final LocalDate date, final Long timeId) {
         String sql = """
-                SELECT
-                *
+                SELECT EXISTS(
+                SELECT 1
                 FROM reservation as r
-                FETCH JOIN reservation_time as t
-                ON r.time_id = t.id
                 WHERE r.date = ?
-                AND r.time_id = ?
+                AND r.id = ?)
                 """;
-        return jdbcTemplate.queryForObject(sql, ROW_MAPPER, date, timeId);
+        return jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId);
     }
 }

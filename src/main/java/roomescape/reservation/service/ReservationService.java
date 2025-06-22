@@ -9,6 +9,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.repository.ReservationTimeRepository;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -23,9 +24,9 @@ public class ReservationService {
     }
 
     public Reservation save(ReservationRequestDto reservationRequestDto) {
-        if (!reservationTimeRepository.existsByStartAt(reservationRequestDto.time())) {
-            throw new RestApiException(ReservationErrorStatus.TIME_NOT_FOUND);
-        }
+        validateReservationTimeExists(reservationRequestDto);
+        validateDuplicateDateAndTime(reservationRequestDto);
+
         ReservationTime time = reservationTimeRepository.findByStartAt(reservationRequestDto.time());
         Reservation requestReservation = reservationRequestDto.toEntity(time);
 
@@ -51,5 +52,20 @@ public class ReservationService {
         }
 
         reservationRepository.deleteById(id);
+    }
+
+
+    private void validateDuplicateDateAndTime(ReservationRequestDto reservationRequestDto) {
+        LocalDate date = reservationRequestDto.date();
+        ReservationTime reservationTime = reservationTimeRepository.findByStartAt(reservationRequestDto.time());
+        if(reservationRepository.existsByDateAndTimeId(date,reservationTime.getId())){
+            throw new RestApiException(ReservationErrorStatus.DUPLICATE_DATE_TIME);
+        }
+    }
+
+    private void validateReservationTimeExists(ReservationRequestDto reservationRequestDto) {
+        if (!reservationTimeRepository.existsByStartAt(reservationRequestDto.time())) {
+            throw new RestApiException(ReservationErrorStatus.TIME_NOT_FOUND);
+        }
     }
 }

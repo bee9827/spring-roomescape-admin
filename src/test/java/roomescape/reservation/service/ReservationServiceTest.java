@@ -87,7 +87,22 @@ class ReservationServiceTest {
             ).thenReturn(false);
 
             assertThatThrownBy(() -> reservationService.save(reservationRequestDto))
-                    .isInstanceOf(RestApiException.class).hasMessage(ReservationErrorStatus.TIME_NOT_FOUND.getMessage());
+                    .isInstanceOf(RestApiException.class)
+                    .hasMessage(ReservationErrorStatus.TIME_NOT_FOUND.getMessage());
+        }
+
+        @Test
+        @DisplayName("예외: 중복된 날짜와 시간이 저장 되면 예외를 던진다.")
+        public void duplicateDateException() {
+            when(reservationTimeRepository.existsByStartAt(any()))
+                    .thenReturn(true);
+            when(reservationRepository.existsByDateAndTimeId(any(), any()))
+                    .thenReturn(true);
+            when(reservationTimeRepository.findByStartAt(any())).thenReturn(reservationTime);
+
+            assertThatThrownBy(() -> reservationService.save(reservationRequestDto))
+                    .isInstanceOf(RestApiException.class)
+                    .hasMessage(ReservationErrorStatus.DUPLICATE_DATE_TIME.getMessage());
         }
 
 //        @Test
